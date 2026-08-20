@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::section})}">
+<section>
+    <article class="panel form-panel reveal">
+        <header class="panel-head">
+            <div>
+                <span class="eyebrow" th:text="${module.group}">Grupo</span>
+                <h3 th:text="${pageTitle}">Formulario</h3>
+            </div>
+            <a class="btn-ghost"
+               th:href="${next == 'inventario'} ? @{/inventario} : @{/modules/{key}(key=${module.key})}">
+                <i class="bi bi-arrow-left"></i> Volver
+            </a>
+        </header>
+
+        <form class="record-form"
+              th:action="${creating} ? @{/modules/{key}(key=${module.key})} : @{/modules/{key}/{id}(key=${module.key}, id=${recordId})}"
+              method="post">
+            <input type="hidden" th:if="${next}" name="next" th:value="${next}">
+            <div class="form-grid">
+                <div class="field" th:each="field : ${module.fields}"
+                     th:if="${!(creating and module.autoId and field.name == module.idColumn)}">
+                    <label th:for="${field.name}">
+                        <span th:text="${field.label}">Campo</span>
+                        <em th:if="${field.required}">*</em>
+                    </label>
+
+                    <textarea th:if="${field.type == 'textarea'}"
+                              th:id="${field.name}"
+                              th:name="${field.name}"
+                              th:required="${field.required}"
+                              th:readonly="${field.readOnly}"
+                              rows="4"
+                              th:text="${record.get(field.name)}">
+                    </textarea>
+
+                    <input th:unless="${field.type == 'textarea'}"
+                           th:id="${field.name}"
+                           th:name="${field.name}"
+                           th:type="${field.type == 'decimal' ? 'number' : (field.type == 'password' ? (creating ? 'password' : 'text') : field.type)}"
+                           th:step="${field.type == 'decimal' ? '0.01' : null}"
+                           th:required="${field.required and !(field.name == 'contrasena' and !creating)}"
+                           th:readonly="${field.readOnly}"
+                           th:placeholder="${field.name == 'contrasena' and !creating} ? 'Dejar vacío para conservar' : ${field.label}"
+                           th:value="${field.name == 'contrasena'} ? '' : ${record.get(field.name)}">
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <a class="btn-ghost"
+                   th:href="${next == 'inventario'} ? @{/inventario} : @{/modules/{key}(key=${module.key})}">Cancelar</a>
+                <button class="btn-neon" type="submit">
+                    <i class="bi bi-check2-circle"></i>
+                    <span th:text="${creating} ? 'Crear registro' : 'Guardar cambios'">Guardar</span>
+                </button>
+            </div>
+        </form>
+    </article>
+</section>
+</html>

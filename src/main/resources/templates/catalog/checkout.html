@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#070b1a">
+    <title>Pagar · Newphone</title>
+    <link rel="icon" type="image/png" th:href="@{/images/newphone-logo.png}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/catalog.css}">
+    <link rel="stylesheet" th:href="@{/css/cart-page.css}">
+    <link rel="stylesheet" th:href="@{/css/checkout.css}">
+    <link rel="stylesheet" th:href="@{/css/whatsapp.css}">
+</head>
+<body class="cart-page">
+<div class="noise" aria-hidden="true"></div>
+
+<header class="top">
+    <div class="top-inner cart-top">
+        <a class="brand" th:href="@{/catalog}" aria-label="Newphone inicio">
+            <img th:src="@{/images/newphone-logo.png}" alt="Logo Newphone">
+            <span>
+                <strong>Newphone</strong>
+                <small>Celulares y accesorios</small>
+            </span>
+        </a>
+        <div class="top-actions">
+            <a class="ghost-btn" th:href="@{/cart}">
+                <i class="bi bi-arrow-left"></i>
+                <span>Volver al carrito</span>
+            </a>
+            <a class="ghost-btn cart-toggle" th:href="@{/cart}">
+                <i class="bi bi-bag-check"></i>
+                <span>Carrito</span>
+                <em class="cart-badge" th:hidden="${cartCount == null or cartCount == 0}"
+                    th:text="${cartCount}">0</em>
+            </a>
+        </div>
+    </div>
+</header>
+
+<main class="cart-shell">
+    <section class="cart-hero">
+        <nav class="crumbs" aria-label="Migas de pan">
+            <a th:href="@{/catalog}">Catálogo</a>
+            <i class="bi bi-chevron-right" aria-hidden="true"></i>
+            <a th:href="@{/cart}">Carrito</a>
+            <i class="bi bi-chevron-right" aria-hidden="true"></i>
+            <span>Pago</span>
+        </nav>
+        <span class="live"><span></span> Pago seguro</span>
+        <h1>Elige cómo pagar</h1>
+        <p>Completa la dirección y el teléfono, elige el medio de pago y simularemos el recaudo para generar tu guía de seguimiento.</p>
+    </section>
+
+    <div th:if="${error}" class="cart-status page-status error" th:text="${error}">Error</div>
+
+    <form id="checkoutForm" class="cart-layout checkout-layout" th:action="@{/checkout}" method="post" novalidate>
+        <div>
+            <section class="ship-box">
+                <div class="card-box-head">
+                    <i class="bi bi-geo-alt"></i>
+                    <div>
+                        <strong>Datos de entrega</strong>
+                        <small>Usaremos estos datos para enviarte el pedido y para el seguimiento.</small>
+                    </div>
+                </div>
+                <div class="card-row">
+                    <div class="field">
+                        <label for="nombre">Nombre de quien recibe</label>
+                        <input id="nombre" name="nombre" type="text" autocomplete="name"
+                               placeholder="Nombre completo" th:value="${nombre}">
+                        <span id="error-nombre" class="field-error" hidden></span>
+                    </div>
+                    <div class="field">
+                        <label for="telefono">Teléfono</label>
+                        <input id="telefono" name="telefono" type="tel" autocomplete="tel"
+                               placeholder="300..." th:value="${telefono}">
+                        <span id="error-telefono" class="field-error" hidden></span>
+                    </div>
+                </div>
+                <div class="field">
+                    <label for="direccion">Dirección de entrega</label>
+                    <textarea id="direccion" name="direccion" rows="3"
+                              placeholder="Calle, número, barrio y ciudad" th:text="${direccion}"></textarea>
+                    <span id="error-direccion" class="field-error" hidden></span>
+                </div>
+            </section>
+
+            <p class="pay-label">Método de pago</p>
+            <div class="pay-grid">
+                <label class="pay-option" th:each="method : ${methods}">
+                    <input type="radio" name="metodo" th:value="${method.id}"
+                           th:checked="${metodo == method.id}">
+                    <i th:class="'bi ' + ${method.icono}" aria-hidden="true"></i>
+                    <span>
+                        <strong th:text="${method.nombre}">Método</strong>
+                        <small th:text="${method.descripcion}">Descripción</small>
+                    </span>
+                    <em></em>
+                </label>
+            </div>
+            <p id="error-metodo" class="field-error" hidden></p>
+
+            <div class="card-box" id="cardFields" hidden>
+                <div class="card-box-head">
+                    <i class="bi bi-shield-lock"></i>
+                    <div>
+                        <strong>Datos de la tarjeta</strong>
+                        <small>No almacenamos el número completo. El cobro se procesa de forma segura.</small>
+                    </div>
+                </div>
+                <div class="field">
+                    <label for="titular">Nombre en la tarjeta</label>
+                    <input id="titular" name="titular" type="text" autocomplete="cc-name"
+                           placeholder="Como aparece en la tarjeta">
+                    <span id="error-titular" class="field-error" hidden></span>
+                </div>
+                <div class="field">
+                    <label for="numero">Número de tarjeta</label>
+                    <input id="numero" name="numero" type="text" inputmode="numeric" autocomplete="cc-number"
+                           maxlength="19" placeholder="ACCT-000003">
+                    <span id="error-numero" class="field-error" hidden></span>
+                </div>
+                <div class="card-row">
+                    <div class="field">
+                        <label for="vencimiento">Vencimiento</label>
+                        <input id="vencimiento" name="vencimiento" type="text" autocomplete="cc-exp"
+                               maxlength="5" placeholder="MM/AA">
+                        <span id="error-vencimiento" class="field-error" hidden></span>
+                    </div>
+                    <div class="field">
+                        <label for="cvv">CVV</label>
+                        <input id="cvv" name="cvv" type="password" inputmode="numeric" autocomplete="cc-csc"
+                               maxlength="4" placeholder="123">
+                        <span id="error-cvv" class="field-error" hidden></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <aside class="cart-panel" aria-label="Resumen del pago">
+            <span class="eyebrow">Resumen</span>
+            <h2>Confirma y paga</h2>
+            <ul class="pay-items">
+                <li th:each="item : ${cart.items}">
+                    <span th:text="${item.cantidad} + ' × ' + ${item.nombre}">Producto</span>
+                    <strong th:text="${item.subtotalLabel}">$0</strong>
+                </li>
+            </ul>
+            <dl>
+                <div>
+                    <dt>Unidades</dt>
+                    <dd th:text="${cart.count}">0</dd>
+                </div>
+                <div>
+                    <dt>Subtotal</dt>
+                    <dd th:text="${cart.totalLabel}">$0</dd>
+                </div>
+                <div>
+                    <dt>Envío</dt>
+                    <dd>A tu dirección</dd>
+                </div>
+            </dl>
+            <div class="cart-panel-total">
+                <span>Total a pagar</span>
+                <strong th:text="${cart.totalLabel}">$0</strong>
+            </div>
+            <button class="primary" type="submit" id="payButton">
+                Simular pago <span th:text="${cart.totalLabel}">$0</span>
+                <i class="bi bi-lock-fill"></i>
+            </button>
+            <a class="ghost-btn" th:href="@{/cart}">Volver al carrito</a>
+            <p class="hint">Después del pago simulado recibirás una guía para seguir el pedido.</p>
+        </aside>
+    </form>
+</main>
+
+<footer class="foot">
+    <div>
+        <img th:src="@{/images/newphone-logo.png}" alt="">
+        <strong>Newphone</strong>
+    </div>
+    <p>© 2026 Newphone · Celulares y accesorios</p>
+    <a th:href="${storeContact.whatsappUrl}" target="_blank" rel="noopener noreferrer">WhatsApp comercial</a>
+    <a th:href="${storeContact.telUrl}">Llamar</a>
+    <a th:href="@{/catalog}">Volver al catálogo</a>
+</footer>
+
+<div th:replace="~{fragments/whatsapp :: widget}"></div>
+<script th:src="@{/js/checkout.js}"></script>
+<script th:src="@{/js/whatsapp.js}"></script>
+</body>
+</html>

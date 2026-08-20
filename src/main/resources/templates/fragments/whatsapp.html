@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="widget" class="wa-widget" id="waWidget">
+    <div class="wa-panel" id="waPanel" hidden>
+        <div class="wa-panel-head">
+            <strong>Contacto Newphone</strong>
+            <button type="button" class="wa-close" id="waClose" aria-label="Cerrar opciones de contacto">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+        <p>Si no tienes WhatsApp, usa otra vía. Un asesor te atiende en horario comercial.</p>
+        <p class="wa-hours" th:text="${storeContact.hours}">Horario</p>
+        <a class="wa-action" th:href="${storeContact.telUrl}">
+            <i class="bi bi-telephone"></i>
+            <span>
+                Llamar
+                <small th:text="${storeContact.display}">+57 300 100 1001</small>
+            </span>
+        </a>
+        <a class="wa-action" th:href="${storeContact.mailto}">
+            <i class="bi bi-envelope"></i>
+            <span>
+                Escribir un correo
+                <small th:text="${storeContact.email}">asesor@newphone.com</small>
+            </span>
+        </a>
+        <button type="button" class="wa-action" id="waCopy"
+                th:data-phone="${storeContact.display}">
+            <i class="bi bi-clipboard"></i>
+            <span>
+                Copiar número
+                <small th:text="${storeContact.display}">+57 300 100 1001</small>
+            </span>
+        </button>
+        <p class="wa-copy-ok" id="waCopyOk" hidden>Número copiado. Puedes pegarlo en tu app de llamadas o SMS.</p>
+    </div>
+
+    <button type="button" class="wa-fallback" id="waFallback">
+        ¿Sin WhatsApp?
+    </button>
+    <a class="wa-fab" id="waFab"
+       th:href="${storeContact.whatsappUrl}"
+       th:data-fallback="${storeContact.whatsappApiUrl}"
+       target="_blank"
+       rel="noopener noreferrer"
+       aria-label="Chatear con un asesor comercial por WhatsApp">
+        <i class="bi bi-whatsapp" aria-hidden="true"></i>
+        <span>Asesor</span>
+    </a>
+</div>
+</body>
+</html>

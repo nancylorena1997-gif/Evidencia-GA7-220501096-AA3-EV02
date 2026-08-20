@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#070b1a">
+    <title>Registro · Newphone</title>
+    <link rel="icon" type="image/png" th:href="@{/images/newphone-logo.png}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/auth.css}">
+    <link rel="stylesheet" th:href="@{/css/whatsapp.css}">
+</head>
+<body>
+<main class="auth-shell">
+    <section class="showcase">
+        <a class="brand" th:href="@{/catalog}">
+            <img class="brand-logo" th:src="@{/images/newphone-logo.png}" alt="Logo Newphone">
+            <span><strong>Newphone</strong><small>Celulares y accesorios</small></span>
+        </a>
+        <div class="showcase-copy">
+            <span class="live-pill"><span></span> Únete hoy</span>
+            <h1>Empieza a vender<br><em>con estilo.</em></h1>
+            <p>Crea tu cuenta de cliente y explora el centro de operaciones Newphone.</p>
+        </div>
+        <div class="orb orb-one"></div>
+        <div class="orb orb-two"></div>
+        <img class="showcase-logo" th:src="@{/images/newphone-logo.png}" alt="">
+        <footer>© 2026 Newphone · Proyecto SENA Frameworks</footer>
+    </section>
+
+    <section class="auth-panel">
+        <div class="auth-card">
+            <div class="mobile-brand">
+                <img class="brand-logo" th:src="@{/images/newphone-logo.png}" alt="Logo Newphone">
+                <strong>Newphone</strong>
+            </div>
+
+            <div class="auth-tabs">
+                <a th:href="${next} ? @{/login(next=${next})} : @{/login}">Iniciar sesión</a>
+                <a class="active" th:href="${next} ? @{/register(next=${next})} : @{/register}">Crear cuenta</a>
+            </div>
+
+            <span class="eyebrow">Únete a Newphone</span>
+            <h2>Crea tu cuenta</h2>
+            <p>Completa tus datos para comenzar.</p>
+
+            <div th:if="${error}" class="alert error" th:text="${error}">Error</div>
+
+            <form id="registerForm" th:action="@{/register}" method="post" novalidate>
+                <input type="hidden" name="next" th:if="${next}" th:value="${next}">
+                <div class="field">
+                    <label for="nombre">Nombre completo</label>
+                    <div class="input-wrap">
+                        <i class="bi bi-person"></i>
+                        <input id="nombre" name="nombre" type="text" required minlength="3"
+                               autocomplete="name" placeholder="Tu nombre" aria-describedby="error-nombre">
+                    </div>
+                    <span id="error-nombre" class="field-error" data-error-for="nombre" hidden></span>
+                </div>
+
+                <div class="field">
+                    <label for="cedula">Cédula</label>
+                    <div class="input-wrap">
+                        <i class="bi bi-card-text"></i>
+                        <input id="cedula" name="cedula" type="number" required
+                               inputmode="numeric" placeholder="Documento" aria-describedby="error-cedula">
+                    </div>
+                    <span id="error-cedula" class="field-error" data-error-for="cedula" hidden></span>
+                </div>
+
+                <div class="field">
+                    <label for="telefono">Teléfono</label>
+                    <div class="input-wrap">
+                        <i class="bi bi-telephone"></i>
+                        <input id="telefono" name="telefono" type="tel" required minlength="7"
+                               autocomplete="tel" placeholder="300..." aria-describedby="error-telefono">
+                    </div>
+                    <span id="error-telefono" class="field-error" data-error-for="telefono" hidden></span>
+                </div>
+
+                <div class="field">
+                    <label for="email">Correo electrónico</label>
+                    <div class="input-wrap">
+                        <i class="bi bi-envelope"></i>
+                        <input id="email" name="email" type="email" required
+                               autocomplete="email" placeholder="nombre@correo.com" aria-describedby="error-email">
+                    </div>
+                    <span id="error-email" class="field-error" data-error-for="email" hidden></span>
+                </div>
+
+                <div class="field">
+                    <label for="password">Contraseña</label>
+                    <div class="input-wrap">
+                        <i class="bi bi-lock"></i>
+                        <input id="password" name="password" type="password" required minlength="6"
+                               autocomplete="new-password" placeholder="Mínimo 6 caracteres"
+                               aria-describedby="error-password">
+                    </div>
+                    <span id="error-password" class="field-error" data-error-for="password" hidden></span>
+                </div>
+
+                <div class="field">
+                    <label for="confirmation">Confirmar contraseña</label>
+                    <div class="input-wrap">
+                        <i class="bi bi-shield-lock"></i>
+                        <input id="confirmation" name="confirmation" type="password" required minlength="6"
+                               autocomplete="new-password" placeholder="Repite la contraseña"
+                               aria-describedby="error-confirmation">
+                    </div>
+                    <span id="error-confirmation" class="field-error" data-error-for="confirmation" hidden></span>
+                </div>
+
+                <button class="primary-button" type="submit">
+                    Crear cuenta <i class="bi bi-arrow-right"></i>
+                </button>
+            </form>
+        </div>
+    </section>
+</main>
+<script th:src="@{/js/auth.js}"></script>
+<div th:replace="~{fragments/whatsapp :: widget}"></div>
+<script th:src="@{/js/whatsapp.js}"></script>
+</body>
+</html>

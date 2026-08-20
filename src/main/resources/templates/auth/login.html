@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#070b1a">
+    <title>Acceso · Newphone</title>
+    <link rel="icon" type="image/png" th:href="@{/images/newphone-logo.png}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/auth.css}">
+    <link rel="stylesheet" th:href="@{/css/whatsapp.css}">
+</head>
+<body>
+<main class="auth-shell">
+    <section class="showcase">
+        <a class="brand" th:href="@{/catalog}">
+            <img class="brand-logo" th:src="@{/images/newphone-logo.png}" alt="Logo Newphone">
+            <span><strong>Newphone</strong><small>Celulares y accesorios</small></span>
+        </a>
+        <div class="showcase-copy">
+            <span class="live-pill"><span></span> Plataforma disponible</span>
+            <h1>Tu negocio móvil,<br><em>siempre conectado.</em></h1>
+            <p>Administra catálogo, ventas, clientes e inventario con Spring Boot y SQLite.</p>
+            <div class="feature-list">
+                <div><i class="bi bi-lightning-charge-fill"></i><span><strong>Operación ágil</strong><small>16 módulos en un solo panel.</small></span></div>
+                <div><i class="bi bi-shield-check"></i><span><strong>Acceso protegido</strong><small>Contraseñas con PBKDF2.</small></span></div>
+                <div><i class="bi bi-database-check"></i><span><strong>SQLite integrado</strong><small>Sin servidores adicionales.</small></span></div>
+            </div>
+        </div>
+        <div class="orb orb-one"></div>
+        <div class="orb orb-two"></div>
+        <img class="showcase-logo" th:src="@{/images/newphone-logo.png}" alt="">
+        <footer>© 2026 Newphone · Proyecto SENA Frameworks</footer>
+    </section>
+
+    <section class="auth-panel">
+        <div class="auth-card">
+            <div class="mobile-brand">
+                <img class="brand-logo" th:src="@{/images/newphone-logo.png}" alt="Logo Newphone">
+                <strong>Newphone</strong>
+            </div>
+
+            <div class="auth-tabs">
+                <a class="active" th:href="${next} ? @{/login(next=${next})} : @{/login}">Iniciar sesión</a>
+                <a th:href="${next} ? @{/register(next=${next})} : @{/register}">Crear cuenta</a>
+            </div>
+
+            <span class="eyebrow">Bienvenido de nuevo</span>
+            <h2>Accede a Newphone</h2>
+            <p>Ingresa tus credenciales para continuar.</p>
+
+            <div th:if="${error}" class="alert error" th:text="${error}">Error</div>
+            <div th:if="${success}" class="alert success" th:text="${success}">OK</div>
+
+            <form th:action="@{/login}" method="post" novalidate>
+                <input type="hidden" name="next" th:if="${next}" th:value="${next}">
+                <label for="email">Correo electrónico</label>
+                <div class="input-wrap">
+                    <i class="bi bi-envelope"></i>
+                    <input id="email" name="email" type="email" autocomplete="email"
+                           placeholder="nombre@correo.com" required>
+                </div>
+                <label for="password">Contraseña</label>
+                <div class="input-wrap">
+                    <i class="bi bi-lock"></i>
+                    <input id="password" name="password" type="password" autocomplete="current-password"
+                           placeholder="Tu contraseña" required>
+                </div>
+                <button class="primary-button" type="submit">
+                    Entrar a mi cuenta <i class="bi bi-arrow-right"></i>
+                </button>
+            </form>
+
+            <div class="demo-access">
+                <i class="bi bi-info-circle"></i>
+                <span>Demo admin: <strong>admin@newphone.com</strong> / <strong>admin123</strong><br>
+                Demo cliente: <strong>cliente@newphone.com</strong> / <strong>cliente123</strong></span>
+            </div>
+            <p style="margin-top:16px;text-align:center;color:#8b93b0;font-size:.9rem;">
+                ¿Solo quieres ver productos?
+                <a th:href="@{/catalog}" style="color:#20d9ff;font-weight:700;">Ir al catálogo público</a>
+            </p>
+        </div>
+    </section>
+</main>
+<div th:replace="~{fragments/whatsapp :: widget}"></div>
+<script th:src="@{/js/whatsapp.js}"></script>
+</body>
+</html>

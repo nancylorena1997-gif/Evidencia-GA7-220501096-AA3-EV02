@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" th:fragment="layout(content)">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#070b1a">
+    <title th:text="${pageTitle} + ' · Newphone'">Newphone</title>
+    <link rel="icon" type="image/png" th:href="@{/images/newphone-logo.png}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+        <a class="brand" th:href="@{/dashboard}">
+            <img class="brand-logo" th:src="@{/images/newphone-logo.png}" alt="Logo Newphone">
+            <span>
+                <strong>Newphone</strong>
+                <small>Celulares y accesorios</small>
+            </span>
+        </a>
+
+        <div class="workspace-card">
+            <span class="eyebrow">Espacio de trabajo</span>
+            <div><span class="status-dot"></span> Tienda principal</div>
+        </div>
+
+        <nav class="sidebar-nav" aria-label="Navegación principal">
+            <a class="nav-link" th:classappend="${activeNav == 'dashboard'} ? ' active'" th:href="@{/dashboard}">
+                <i class="bi bi-grid-1x2-fill"></i><span>Resumen</span>
+            </a>
+            <a class="nav-link" th:classappend="${activeNav == 'inventario'} ? ' active'" th:href="@{/inventario}">
+                <i class="bi bi-clipboard-data"></i><span>Inventario</span>
+                <em class="nav-badge" th:if="${inventoryAlertCount != null and inventoryAlertCount > 0}"
+                    th:text="${inventoryAlertCount}">0</em>
+            </a>
+            <a class="nav-link" th:classappend="${activeNav == 'gestion-pedidos'} ? ' active'" th:href="@{/pedidos}">
+                <i class="bi bi-bag-check"></i><span>Pedidos</span>
+                <em class="nav-badge" th:if="${pendingOrderCount != null and pendingOrderCount > 0}"
+                    th:text="${pendingOrderCount}">0</em>
+            </a>
+
+            <th:block th:each="item : ${navItems}">
+                <div class="nav-section" th:if="${item.section}" th:text="${item.label}">Grupo</div>
+                <a class="nav-link"
+                   th:unless="${item.section}"
+                   th:href="@{/modules/{key}(key=${item.key})}"
+                   th:classappend="${activeNav == item.key} ? ' active'">
+                    <i class="bi" th:classappend="${item.icon}"></i>
+                    <span th:text="${item.label}">Módulo</span>
+                </a>
+            </th:block>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="avatar" th:text="${userName != null and #strings.length(userName) > 0} ? ${#strings.substring(userName,0,1)} : 'N'">N</div>
+            <div class="user-meta">
+                <strong th:text="${userName}">Usuario</strong>
+                <small th:text="${userRole}">ROL</small>
+            </div>
+            <form th:action="@{/logout}" method="post">
+                <button class="logout-button" type="submit" title="Cerrar sesión" aria-label="Cerrar sesión">
+                    <i class="bi bi-box-arrow-right"></i>
+                </button>
+            </form>
+        </div>
+    </aside>
+
+    <main class="main">
+        <header class="topbar">
+            <button class="icon-button mobile-only" type="button" id="menuButton" aria-label="Abrir menú">
+                <i class="bi bi-list"></i>
+            </button>
+            <div>
+                <div class="breadcrumb-line">
+                    <span>Newphone</span>
+                    <i class="bi bi-chevron-right"></i>
+                    <span th:text="${breadcrumb}">Sección</span>
+                </div>
+                <h1 th:text="${pageTitle}">Título</h1>
+            </div>
+            <div class="topbar-actions">
+                <div class="notice-wrap" th:if="${inventoryAlertCount != null}">
+                    <button class="chip notice-bell" type="button" id="inventoryBell"
+                            aria-haspopup="true" aria-controls="inventoryMenu"
+                            th:attr="aria-expanded='false'">
+                        <i class="bi bi-bell"></i>
+                        Alertas
+                        <em class="nav-badge" th:if="${inventoryAlertCount > 0}" th:text="${inventoryAlertCount}">0</em>
+                    </button>
+                    <div class="notice-menu" id="inventoryMenu" hidden>
+                        <strong>Stock por agotarse</strong>
+                        <p th:if="${inventoryAlertCount == 0}">El inventario está en niveles saludables.</p>
+                        <ul th:if="${inventoryAlertCount > 0}">
+                            <li th:each="item : ${inventoryAlerts}">
+                                <a th:href="@{/modules/productos/{id}/edit(id=${item.idproducto}, next='inventario')}">
+                                    <span>
+                                        <b th:text="${item.nombre}">Producto</b>
+                                        <small th:text="${item.stockLabel} + ' · ' + ${item.stock} + ' uds'">0</small>
+                                    </span>
+                                    <i class="bi bi-pencil-square"></i>
+                                </a>
+                            </li>
+                        </ul>
+                        <a class="notice-link" th:href="@{/inventario(estado='alerta')}">Abrir inventario</a>
+                    </div>
+                </div>
+                <a class="chip" th:href="@{/catalog}" title="Ver catálogo público">
+                    <i class="bi bi-shop"></i>
+                    Catálogo público
+                </a>
+                <div class="chip">
+                    <span class="status-dot"></span>
+                    SQLite en línea
+                </div>
+            </div>
+        </header>
+
+        <div class="content">
+            <div th:if="${success}" class="toast toast-success" role="status">
+                <i class="bi bi-check-circle-fill"></i>
+                <span th:text="${success}">OK</span>
+            </div>
+            <div th:if="${error}" class="toast toast-error" role="alert">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                <span th:text="${error}">Error</span>
+            </div>
+
+            <div th:replace="${content}">Contenido</div>
+        </div>
+    </main>
+</div>
+<div class="backdrop" id="backdrop"></div>
+<script th:src="@{/js/app.js}"></script>
+</body>
+</html>

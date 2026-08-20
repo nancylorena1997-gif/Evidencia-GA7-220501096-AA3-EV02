@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::section})}">
+<section>
+    <div class="inventory-banner" th:if="${alertCount > 0}">
+        <div>
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <div>
+                <strong th:text="${alertCount == 1} ? '1 producto necesita reposición' : (${alertCount} + ' productos necesitan reposición')">Alerta</strong>
+                <p th:text="'Hay existencias en ' + ${threshold} + ' unidades o menos. Actualiza el catálogo para no perder ventas.'">Aviso</p>
+            </div>
+        </div>
+        <a class="btn-ghost" th:href="@{/inventario(estado='alerta')}">Ver alertas</a>
+    </div>
+
+    <div class="metrics-grid inventory-metrics">
+        <article class="metric-card">
+            <span class="metric-label">En catálogo</span>
+            <strong th:text="${catalogCount}">0</strong>
+            <small>Productos en catálogo</small>
+            <i class="bi bi-box-seam metric-icon"></i>
+        </article>
+        <article class="metric-card accent">
+            <span class="metric-label">Alertas</span>
+            <strong th:text="${alertCount}">0</strong>
+            <small th:text="'Stock ≤ ' + ${threshold} + ' uds'">Umbral</small>
+            <i class="bi bi-bell metric-icon"></i>
+        </article>
+        <article class="metric-card">
+            <span class="metric-label">Agotados</span>
+            <strong th:text="${outCount}">0</strong>
+            <small>Sin unidades</small>
+            <i class="bi bi-x-octagon metric-icon"></i>
+        </article>
+    </div>
+
+    <div class="toolbar reveal">
+        <div class="filter-tabs">
+            <a th:href="@{/inventario}" th:classappend="${estado == 'todos'} ? ' active'">Todos</a>
+            <a th:href="@{/inventario(estado='alerta')}" th:classappend="${estado == 'alerta'} ? ' active'">Alertas</a>
+            <a th:href="@{/inventario(estado='bajo')}" th:classappend="${estado == 'bajo'} ? ' active'">Stock bajo</a>
+            <a th:href="@{/inventario(estado='agotado')}" th:classappend="${estado == 'agotado'} ? ' active'">Agotados</a>
+        </div>
+        <a class="btn-neon" th:href="@{/modules/productos/new(next='inventario')}">
+            <i class="bi bi-plus-lg"></i> Agregar producto
+        </a>
+    </div>
+
+    <article class="panel reveal">
+        <header class="panel-head">
+            <div>
+                <span class="eyebrow">Catálogo</span>
+                <h3>Inventario de productos</h3>
+            </div>
+            <a th:href="@{/modules/productos}">Vista de módulo</a>
+        </header>
+
+        <div class="table-wrap" th:if="${!#lists.isEmpty(products)}">
+            <table>
+                <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Categoría</th>
+                    <th>Precio</th>
+                    <th>Stock</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="product : ${products}" th:classappend="${product.level == 'out'} ? ' row-danger' : (${product.level == 'low'} ? ' row-warn' : '')">
+                    <td>
+                        <strong th:text="${product.nombre}">Nombre</strong>
+                        <small th:text="${product.descripcion}">Descripción</small>
+                    </td>
+                    <td th:text="${product.categoria} != null ? ${product.categoria} : 'Sin categoría'">Cat</td>
+                    <td th:text="'$' + ${#numbers.formatDecimal(product.precio, 1, 'COMMA', 0, 'POINT')}">$0</td>
+                    <td th:text="${product.stock} + ' uds'">0</td>
+                    <td>
+                        <span class="stock-pill"
+                              th:classappend="${product.level == 'out'} ? ' danger' : (${product.level == 'low'} ? ' warn' : '')"
+                              th:text="${product.stockLabel}">Estado</span>
+                    </td>
+                    <td class="actions">
+                        <a class="icon-action"
+                           th:href="@{/modules/productos/{id}/edit(id=${product.idproducto}, next='inventario')}"
+                           title="Editar producto">
+                            <i class="bi bi-pencil-square"></i>
+                        </a>
+                        <form th:action="@{/modules/productos/{id}/delete(id=${product.idproducto})}"
+                              method="post"
+                              onsubmit="return confirm('¿Eliminar este producto del catálogo?');">
+                            <input type="hidden" name="next" value="inventario">
+                            <button class="icon-action danger" type="submit" title="Eliminar producto">
+                                <i class="bi bi-trash3"></i>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="empty-state" th:if="${#lists.isEmpty(products)}">
+            <i class="bi bi-box-seam"></i>
+            <h3>No hay productos en este filtro</h3>
+            <p>Agrega un producto o cambia el filtro para ver el inventario.</p>
+            <a class="btn-neon" th:href="@{/modules/productos/new(next='inventario')}">
+                <i class="bi bi-plus-lg"></i> Agregar producto
+            </a>
+        </div>
+    </article>
+</section>
+</html>

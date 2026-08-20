@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::section})}">
+<section>
+    <div class="metrics-grid inventory-metrics">
+        <article class="metric-card">
+            <span class="metric-label">Registrados</span>
+            <strong th:text="${metrics.todos}">0</strong>
+            <small>Pedidos de clientes</small>
+            <i class="bi bi-bag-check metric-icon"></i>
+        </article>
+        <article class="metric-card accent">
+            <span class="metric-label">Por gestionar</span>
+            <strong th:text="${metrics.abiertos}">0</strong>
+            <small>Pendientes o preparados</small>
+            <i class="bi bi-hourglass-split metric-icon"></i>
+        </article>
+        <article class="metric-card">
+            <span class="metric-label">Enviados</span>
+            <strong th:text="${metrics.enviado}">0</strong>
+            <small>En camino al cliente</small>
+            <i class="bi bi-truck metric-icon"></i>
+        </article>
+        <article class="metric-card">
+            <span class="metric-label">Entregados</span>
+            <strong th:text="${metrics.entregado}">0</strong>
+            <small>Ciclo cerrado</small>
+            <i class="bi bi-check2-circle metric-icon"></i>
+        </article>
+        <article class="metric-card">
+            <span class="metric-label">Cancelados</span>
+            <strong th:text="${metrics.cancelado}">0</strong>
+            <small>Pedidos anulados</small>
+            <i class="bi bi-x-octagon metric-icon"></i>
+        </article>
+    </div>
+
+    <div class="toolbar reveal">
+        <div class="filter-tabs">
+            <a th:href="@{/pedidos(q=${q})}" th:classappend="${estado == 'todos'} ? ' active'">Todos</a>
+            <a th:href="@{/pedidos(estado='pendiente', q=${q})}" th:classappend="${estado == 'pendiente'} ? ' active'">Pendiente</a>
+            <a th:href="@{/pedidos(estado='preparado', q=${q})}" th:classappend="${estado == 'preparado'} ? ' active'">Preparado</a>
+            <a th:href="@{/pedidos(estado='enviado', q=${q})}" th:classappend="${estado == 'enviado'} ? ' active'">Enviado</a>
+            <a th:href="@{/pedidos(estado='entregado', q=${q})}" th:classappend="${estado == 'entregado'} ? ' active'">Entregado</a>
+            <a th:href="@{/pedidos(estado='cancelado', q=${q})}" th:classappend="${estado == 'cancelado'} ? ' active'">Cancelado</a>
+        </div>
+        <form class="search-form" method="get" th:action="@{/pedidos}">
+            <input type="hidden" name="estado" th:value="${estado}">
+            <input type="search" name="q" th:value="${q}" placeholder="Buscar por cliente, guía o teléfono" aria-label="Buscar pedidos">
+            <button type="submit"><i class="bi bi-search"></i> Buscar</button>
+        </form>
+    </div>
+
+    <article class="panel reveal">
+        <header class="panel-head">
+            <div>
+                <span class="eyebrow">Operación</span>
+                <h3>Pedidos de clientes</h3>
+            </div>
+            <a th:href="@{/modules/pedidos}">Vista de módulo</a>
+        </header>
+
+        <div class="table-wrap" th:if="${!#lists.isEmpty(orders)}">
+            <table>
+                <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Fecha</th>
+                    <th>Cliente</th>
+                    <th>Guía</th>
+                    <th>Pago</th>
+                    <th>Estado</th>
+                    <th>Total</th>
+                    <th>Acciones</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="order : ${orders}">
+                    <td th:text="${order.id}">1</td>
+                    <td th:text="${order.fecha}">2026-01-01</td>
+                    <td>
+                        <strong th:text="${order.cliente}">Cliente</strong>
+                        <small th:text="${order.envioTelefono != null} ? ${order.envioTelefono} : ${order.clienteTelefono}">Tel</small>
+                    </td>
+                    <td th:text="${order.guia != null} ? ${order.guia} : 'Sin guía'">NP-</td>
+                    <td th:text="${order.metodo != null} ? ${order.metodo} : 'Sin pago'">Pago</td>
+                    <td>
+                        <span class="badge" th:classappend="${order.statusClass}"
+                              th:text="${order.statusLabel}">Estado</span>
+                    </td>
+                    <td th:text="'$' + ${#numbers.formatDecimal(order.total, 1, 'COMMA', 0, 'POINT')}">0</td>
+                    <td class="actions">
+                        <a class="icon-action" th:href="@{/pedidos/{id}(id=${order.id})}" title="Ver detalle">
+                            <i class="bi bi-eye"></i>
+                        </a>
+                        <button type="button"
+                                class="icon-action status-action"
+                                th:if="${!order.locked}"
+                                title="Cambiar estado"
+                                th:attr="data-order-id=${order.id},
+                                         data-cliente=${order.cliente},
+                                         data-guia=${order.guia != null} ? ${order.guia} : 'Sin guía',
+                                         data-status=${order.statusKey},
+                                         data-status-label=${order.statusLabel},
+                                         data-status-class=${order.statusClass}">
+                                <i class="bi bi-card-checklist"></i>
+                        </button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="empty-state" th:if="${#lists.isEmpty(orders)}">
+            <i class="bi bi-bag"></i>
+            <h3>No hay pedidos en este filtro</h3>
+            <p>Cambia el estado o la búsqueda para ver los pedidos de los clientes.</p>
+        </div>
+    </article>
+
+    <div class="order-modal-backdrop" id="orderModalBackdrop" hidden></div>
+    <div class="order-modal" id="orderStatusModal" hidden role="dialog" aria-modal="true" aria-labelledby="modalOrderTitle">
+        <div class="order-modal-card">
+            <div class="order-modal-glow" aria-hidden="true"></div>
+            <header class="order-modal-head">
+                <div>
+                    <span class="live-pill"><span></span> Cambio de estado</span>
+                    <h3 id="modalOrderTitle">Pedido #1</h3>
+                    <p id="modalOrderMeta">Cliente · Guía</p>
+                </div>
+                <button class="icon-action" type="button" data-close-order-modal aria-label="Cerrar">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </header>
+
+            <div class="order-modal-current">
+                <span>Estado actual</span>
+                <span class="badge" id="modalCurrentStatus">Pendiente</span>
+            </div>
+
+            <form id="orderStatusForm" method="post">
+                <input type="hidden" name="returnTo" value="list">
+                <input type="hidden" name="filterEstado" th:value="${estado}">
+                <input type="hidden" name="q" th:if="${q != null}" th:value="${q}">
+
+                <div class="field">
+                    <label for="modalEstado">Nuevo estado <em>*</em></label>
+                    <select id="modalEstado" name="estado" required>
+                        <option value="" disabled selected>Selecciona el nuevo estado</option>
+                        <option th:each="status : ${statuses}"
+                                th:value="${status.key}"
+                                th:text="${status.label}">Estado</option>
+                    </select>
+                </div>
+
+                <label class="confirm-check modal-confirm">
+                    <input type="checkbox" id="modalConfirm" name="confirmado">
+                    Confirmo la modificación. El cliente verá este estado en el seguimiento.
+                </label>
+
+                <div class="order-modal-actions">
+                    <button class="btn-ghost" type="button" data-close-order-modal>Cancelar</button>
+                    <button class="btn-neon modal-submit" type="submit" id="modalSubmit" disabled>
+                        <i class="bi bi-lightning-charge-fill"></i> Actualizar estado
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script th:src="@{/js/orders.js}"></script>
+</section>
+</html>

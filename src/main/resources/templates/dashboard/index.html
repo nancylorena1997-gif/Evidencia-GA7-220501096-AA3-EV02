@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::section})}">
+<section>
+    <div class="welcome-panel reveal">
+        <div>
+            <span class="live-pill"><span></span> Operación en línea</span>
+            <h2>Todo tu negocio,<br><em>bajo control.</em></h2>
+            <p>Ventas, inventario, clientes y atención en un centro de operaciones con la energía de Newphone.</p>
+            <div class="hero-actions">
+                <a class="btn-neon" th:href="@{/pedidos}">
+                    <i class="bi bi-bag-check"></i> Gestionar pedidos
+                </a>
+                <a class="btn-ghost" th:href="@{/inventario}">
+                    <i class="bi bi-clipboard-data"></i> Inventario
+                </a>
+            </div>
+        </div>
+        <div class="hero-phone" aria-hidden="true">
+            <div class="phone-glow"></div>
+            <div class="phone-body">
+                <div class="phone-island"></div>
+                <div class="phone-screen">
+                    <img th:src="@{/images/newphone-logo.png}" alt="">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="metrics-grid">
+        <article class="metric-card reveal" style="--delay:.05s">
+            <span class="metric-label">Ventas</span>
+            <strong th:text="${#numbers.formatDecimal(summary.sales, 1, 'COMMA', 0, 'POINT')}">0</strong>
+            <small>Total acumulado</small>
+            <i class="bi bi-currency-dollar metric-icon"></i>
+        </article>
+        <article class="metric-card reveal" style="--delay:.1s">
+            <span class="metric-label">Pedidos</span>
+            <strong th:text="${summary.orders}">0</strong>
+            <small>Órdenes registradas</small>
+            <i class="bi bi-bag-check metric-icon"></i>
+        </article>
+        <article class="metric-card reveal" style="--delay:.15s">
+            <span class="metric-label">Clientes</span>
+            <strong th:text="${summary.customers}">0</strong>
+            <small>Base activa</small>
+            <i class="bi bi-people metric-icon"></i>
+        </article>
+        <article class="metric-card reveal" style="--delay:.2s">
+            <span class="metric-label">Productos</span>
+            <strong th:text="${summary.products}">0</strong>
+            <small>En catálogo</small>
+            <i class="bi bi-box-seam metric-icon"></i>
+        </article>
+        <article class="metric-card reveal accent" style="--delay:.25s">
+            <span class="metric-label">Alertas de inventario</span>
+            <strong th:text="${inventoryAlertCount}">0</strong>
+            <small>Productos por agotarse</small>
+            <i class="bi bi-bell metric-icon"></i>
+        </article>
+    </div>
+
+    <div class="dashboard-grid">
+        <article class="panel reveal">
+            <header class="panel-head">
+                <div>
+                    <span class="eyebrow">Operación</span>
+                    <h3>Pedidos recientes</h3>
+                </div>
+                <a th:href="@{/pedidos}">Ver todos</a>
+            </header>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Fecha</th>
+                        <th>Cliente</th>
+                        <th>Estado</th>
+                        <th>Total</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="order : ${summary.recentOrders}">
+                        <td th:text="${order.idpedido}">1</td>
+                        <td th:text="${order.fecha}">2026-01-01</td>
+                        <td th:text="${order.cliente}">Cliente</td>
+                        <td><span class="badge" th:text="${order.estado}">Estado</span></td>
+                        <td th:text="'$' + ${#numbers.formatDecimal(order.total, 1, 'COMMA', 0, 'POINT')}">0</td>
+                        <td class="actions">
+                            <a class="icon-action" th:href="@{/pedidos/{id}(id=${order.idpedido})}" title="Ver pedido">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(summary.recentOrders)}">
+                        <td colspan="6" class="empty">Aún no hay pedidos.</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </article>
+
+        <article class="panel reveal">
+            <header class="panel-head">
+                <div>
+                    <span class="eyebrow">Inventario</span>
+                    <h3>Productos por agotarse</h3>
+                </div>
+                <a th:href="@{/inventario(estado='alerta')}">Gestionar</a>
+            </header>
+            <ul class="stock-list">
+                <li th:each="item : ${inventoryAlerts}">
+                    <div>
+                        <strong th:text="${item.nombre}">Producto</strong>
+                        <small th:text="${item.stockLabel}">Estado</small>
+                    </div>
+                    <a class="stock-pill"
+                       th:href="@{/modules/productos/{id}/edit(id=${item.idproducto}, next='inventario')}"
+                       th:classappend="${item.level == 'out'} ? ' danger' : ' warn'"
+                       th:text="${item.stock} + ' uds'">0</a>
+                </li>
+                <li th:if="${#lists.isEmpty(inventoryAlerts)}" class="empty-stock">
+                    No hay alertas de stock. El catálogo está abastecido.
+                </li>
+            </ul>
+        </article>
+
+        <article class="panel reveal wide">
+            <header class="panel-head">
+                <div>
+                    <span class="eyebrow">Analítica</span>
+                    <h3>Ventas por categoría</h3>
+                </div>
+            </header>
+            <div class="bars">
+                <div class="bar-row" th:each="cat : ${summary.salesByCategory}">
+                    <span th:text="${cat.nombre}">Cat</span>
+                    <div class="bar-track">
+                        <div class="bar-fill" th:style="'width:' + ${cat.percent} + '%'"></div>
+                    </div>
+                    <strong th:text="${#numbers.formatDecimal(cat.total, 1, 'COMMA', 0, 'POINT')}">0</strong>
+                </div>
+            </div>
+            <p class="db-note"><i class="bi bi-database"></i> Base SQLite: <code th:text="${databasePath}">ruta</code></p>
+        </article>
+    </div>
+
+    <article class="panel reveal">
+        <header class="panel-head">
+            <div>
+                <span class="eyebrow">Atajos</span>
+                <h3>16 módulos listos</h3>
+            </div>
+        </header>
+        <div class="module-grid">
+            <a class="module-tile" th:each="mod : ${allModules}" th:href="@{/modules/{key}(key=${mod.key})}">
+                <i class="bi" th:classappend="${mod.icon}"></i>
+                <strong th:text="${mod.title}">Módulo</strong>
+                <small th:text="${mod.group}">Grupo</small>
+            </a>
+        </div>
+    </article>
+</section>
+</html>

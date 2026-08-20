@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#070b1a">
+    <title>Procesando pago · Newphone</title>
+    <link rel="icon" type="image/png" th:href="@{/images/newphone-logo.png}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/catalog.css}">
+    <link rel="stylesheet" th:href="@{/css/cart-page.css}">
+    <link rel="stylesheet" th:href="@{/css/checkout.css}">
+    <link rel="stylesheet" th:href="@{/css/whatsapp.css}">
+</head>
+<body class="cart-page">
+<div class="noise" aria-hidden="true"></div>
+
+<main class="cart-shell">
+    <section class="success-card processing-card">
+        <div class="processing-orb" aria-hidden="true"></div>
+        <span class="live"><span></span> Simulación de pago</span>
+        <h1>Conectando con <em th:text="${intent.metodo}">PSE</em></h1>
+        <p>Estamos validando el recaudo. En unos segundos confirmará el pago y se creará tu guía de seguimiento.</p>
+
+        <ol class="sim-steps" id="simSteps">
+            <li class="current">Validando el medio de pago</li>
+            <li>Autorizando el recaudo</li>
+            <li>Generando la guía de envío</li>
+        </ol>
+
+        <form id="confirmForm" th:action="@{/checkout/confirmar}" method="post">
+            <button class="primary" type="submit" id="confirmButton">
+                Continuar ahora <i class="bi bi-arrow-right"></i>
+            </button>
+        </form>
+        <p class="hint">Si la simulación no avanza, pulsa el botón para confirmar el pago.</p>
+    </section>
+</main>
+
+<script>
+(() => {
+    const steps = [...document.querySelectorAll("#simSteps li")];
+    const form = document.getElementById("confirmForm");
+    let index = 0;
+    const timer = window.setInterval(() => {
+        if (index < steps.length - 1) {
+            steps[index].classList.remove("current");
+            steps[index].classList.add("done");
+            index += 1;
+            steps[index].classList.add("current");
+        } else {
+            window.clearInterval(timer);
+            form?.submit();
+        }
+    }, 1100);
+})();
+</script>
+</body>
+</html>

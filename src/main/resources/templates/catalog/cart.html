@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#070b1a">
+    <title>Editar carrito · Newphone</title>
+    <link rel="icon" type="image/png" th:href="@{/images/newphone-logo.png}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/catalog.css}">
+    <link rel="stylesheet" th:href="@{/css/cart-page.css}">
+    <link rel="stylesheet" th:href="@{/css/whatsapp.css}">
+</head>
+<body class="cart-page">
+<div class="noise" aria-hidden="true"></div>
+
+<header class="top">
+    <div class="top-inner cart-top">
+        <a class="brand" th:href="@{/catalog}" aria-label="Newphone inicio">
+            <img th:src="@{/images/newphone-logo.png}" alt="Logo Newphone">
+            <span>
+                <strong>Newphone</strong>
+                <small>Celulares y accesorios</small>
+            </span>
+        </a>
+
+        <div class="top-actions">
+            <a class="ghost-btn" th:href="@{/catalog}">
+                <i class="bi bi-arrow-left"></i>
+                <span>Seguir comprando</span>
+            </a>
+            <a class="ghost-btn" th:href="@{/seguimiento}">
+                <i class="bi bi-truck"></i>
+                <span>Seguir pedido</span>
+            </a>
+            <a class="ghost-btn" th:href="@{/favoritos}">
+                <i class="bi bi-heart"></i>
+                <span>Favoritos</span>
+                <em class="cart-badge" th:hidden="${favoriteCount == null or favoriteCount == 0}"
+                    th:text="${favoriteCount}">0</em>
+            </a>
+            <span class="ghost-btn cart-toggle current" aria-current="page">
+                <i class="bi bi-bag-check"></i>
+                <span>Carrito</span>
+                <em class="cart-badge" id="cartBadge"
+                    th:hidden="${cartCount == null or cartCount == 0}"
+                    th:text="${cartCount}">0</em>
+            </span>
+            <a class="ghost-btn" th:if="${storeUser == null}" th:href="@{/login}">
+                <i class="bi bi-box-arrow-in-right"></i>
+                <span>Acceder</span>
+            </a>
+            <a class="ghost-btn" th:if="${storeUser != null and storeUser.admin}" th:href="@{/dashboard}">
+                <i class="bi bi-grid-1x2"></i>
+                <span>Panel</span>
+            </a>
+            <span class="ghost-btn" th:if="${storeUser != null and storeUser.cliente}">
+                <i class="bi bi-person"></i>
+                <span th:text="${storeUser.nombre}">Cliente</span>
+            </span>
+        </div>
+    </div>
+</header>
+
+<main class="cart-shell">
+    <section class="cart-hero">
+        <nav class="crumbs" aria-label="Migas de pan">
+            <a th:href="@{/catalog}">Catálogo</a>
+            <i class="bi bi-chevron-right" aria-hidden="true"></i>
+            <span>Carrito</span>
+        </nav>
+        <span class="live"><span></span> Revisa tu pedido</span>
+        <h1>Editar carrito</h1>
+        <p>Ajusta cantidades, elimina productos y confirma el total antes de continuar.</p>
+    </section>
+
+    <p class="cart-status page-status" id="cartStatus" hidden></p>
+
+    <div class="cart-empty-panel" id="cartPageEmpty" th:hidden="${!cartEmpty}">
+        <i class="bi bi-bag"></i>
+        <h2>Tu carrito está vacío</h2>
+        <p>Explora el catálogo y agrega los equipos o accesorios que quieras llevar.</p>
+        <a class="primary" th:href="@{/catalog}">Ir al catálogo</a>
+    </div>
+
+    <section class="cart-layout" id="cartPageContent" th:hidden="${cartEmpty}">
+        <div>
+            <div class="cart-table-head">
+                <span>Producto</span>
+                <span>Precio</span>
+                <span>Cantidad</span>
+                <span>Subtotal</span>
+            </div>
+            <div class="cart-page-list" id="cartPageList">
+                <article class="cart-page-line cart-line" th:each="item : ${cart.items}" th:data-id="${item.id}">
+                    <div class="cart-page-info">
+                        <img th:src="${item.image}" th:alt="${item.nombre}">
+                        <span class="category" th:text="${item.categoria}">Categoría</span>
+                        <h3 th:text="${item.nombre}">Producto</h3>
+                        <small th:text="'Hasta ' + ${item.stock} + ' unidades disponibles'">Stock</small>
+                        <button class="remove-item" type="button" data-action="remove">
+                            <i class="bi bi-trash3"></i> Quitar
+                        </button>
+                    </div>
+                    <div class="cart-page-price" th:text="${item.precioLabel}">$0</div>
+                    <div class="qty">
+                        <button type="button" data-action="dec" aria-label="Quitar una unidad">−</button>
+                        <input type="number" min="1" th:max="${item.stock}" th:value="${item.cantidad}"
+                               th:aria-label="'Cantidad de ' + ${item.nombre}">
+                        <button type="button" data-action="inc" aria-label="Agregar una unidad"
+                                th:disabled="${item.cantidad >= item.stock}">+</button>
+                    </div>
+                    <strong class="cart-line-total" th:text="${item.subtotalLabel}">$0</strong>
+                </article>
+            </div>
+        </div>
+
+        <aside class="cart-panel" aria-label="Resumen del carrito">
+            <span class="eyebrow">Resumen</span>
+            <h2>Tu selección</h2>
+            <dl>
+                <div>
+                    <dt>Productos</dt>
+                    <dd id="cartLinesLabel" th:text="${cart.lines}">0</dd>
+                </div>
+                <div>
+                    <dt>Unidades</dt>
+                    <dd id="cartCountLabel" th:text="${cart.count}">0</dd>
+                </div>
+                <div>
+                    <dt>Subtotal</dt>
+                    <dd id="cartSubtotal" th:text="${cart.totalLabel}">$0</dd>
+                </div>
+                <div>
+                    <dt>Envío</dt>
+                    <dd>Por confirmar</dd>
+                </div>
+            </dl>
+            <div class="cart-panel-total">
+                <span>Total</span>
+                <strong id="cartTotal" th:text="${cart.totalLabel}" aria-live="polite">$0</strong>
+            </div>
+            <a class="primary" th:href="@{/checkout}">
+                Continuar compra <i class="bi bi-arrow-right"></i>
+            </a>
+            <a class="ghost-btn" th:href="@{/catalog}">Seguir comprando</a>
+            <button class="remove-item clear-cart" type="button" id="clearCart">
+                <i class="bi bi-x-circle"></i> Vaciar carrito
+            </button>
+            <p class="hint">Los precios incluyen IVA. El envío se define al confirmar el pedido.</p>
+        </aside>
+    </section>
+</main>
+
+<footer class="foot">
+    <div>
+        <img th:src="@{/images/newphone-logo.png}" alt="">
+        <strong>Newphone</strong>
+    </div>
+    <p>© 2026 Newphone · Celulares y accesorios</p>
+    <a th:href="${storeContact.whatsappUrl}" target="_blank" rel="noopener noreferrer">WhatsApp comercial</a>
+    <a th:href="${storeContact.telUrl}">Llamar</a>
+    <a th:href="@{/catalog}">Volver al catálogo</a>
+</footer>
+
+<div th:replace="~{fragments/whatsapp :: widget}"></div>
+<script th:src="@{/js/cart.js}"></script>
+<script th:src="@{/js/whatsapp.js}"></script>
+</body>
+</html>

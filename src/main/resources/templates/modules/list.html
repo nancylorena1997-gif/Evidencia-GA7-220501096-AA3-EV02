@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::section})}">
+<section>
+    <div class="toolbar reveal">
+        <form class="search-form" method="get" th:unless="${module.key == 'reportes'}"
+              th:action="@{/modules/{key}(key=${module.key})}">
+            <i class="bi bi-search"></i>
+            <input type="search" name="q" th:value="${query}" placeholder="Buscar en este módulo…">
+            <button type="submit">Buscar</button>
+        </form>
+        <form class="module-filters" method="get" th:if="${module.key == 'reportes'}"
+              th:action="@{/modules/{key}(key=${module.key})}">
+            <label>
+                Buscar
+                <input type="search" name="q" th:value="${query}" placeholder="Tipo, archivo o análisis…">
+            </label>
+            <label>
+                Tipo
+                <select name="tipo">
+                    <option value="" th:selected="${tipo == null or tipo == ''}">Todos</option>
+                    <option value="Diario" th:selected="${tipo == 'Diario'}">Diario</option>
+                    <option value="Semanal" th:selected="${tipo == 'Semanal'}">Semanal</option>
+                    <option value="Mensual" th:selected="${tipo == 'Mensual'}">Mensual</option>
+                    <option value="Trimestral" th:selected="${tipo == 'Trimestral'}">Trimestral</option>
+                </select>
+            </label>
+            <label>
+                Desde
+                <input type="date" name="desde" th:value="${desde}">
+            </label>
+            <label>
+                Hasta
+                <input type="date" name="hasta" th:value="${hasta}">
+            </label>
+            <div class="module-filter-actions">
+                <button class="btn-neon" type="submit">Filtrar</button>
+                <a class="btn-ghost" th:if="${hasFilters}" th:href="@{/modules/{key}(key=${module.key})}">Limpiar</a>
+            </div>
+        </form>
+        <a class="btn-neon" th:href="@{/modules/{key}/new(key=${module.key})}">
+            <i class="bi bi-plus-lg"></i> Nuevo registro
+        </a>
+    </div>
+
+    <article class="panel reveal">
+        <header class="panel-head">
+            <div>
+                <span class="eyebrow" th:text="${module.group}">Grupo</span>
+                <h3 th:text="${module.title}">Módulo</h3>
+            </div>
+            <span class="chip" th:text="${#lists.size(records)} + ' registros'">0</span>
+        </header>
+
+        <div class="table-wrap" th:if="${!#lists.isEmpty(records)}">
+            <table>
+                <thead>
+                <tr>
+                    <th th:each="field : ${module.fields}" th:text="${field.label}">Campo</th>
+                    <th>Acciones</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="record : ${records}">
+                    <td th:each="field : ${module.fields}">
+                        <span th:if="${field.name == 'contrasena'}">••••••••</span>
+                        <span th:if="${module.key == 'productos' and field.name == 'stock'}"
+                              class="stock-pill"
+                              th:classappend="${record.get('stock') == null or record.get('stock') &lt;= 0} ? ' danger' : (${record.get('stock') &lt;= inventoryThreshold} ? ' warn' : '')"
+                              th:text="${record.get('stock')} + ' uds'">0</span>
+                        <span th:if="${module.key == 'reportes' and field.name == 'total_ventas'}"
+                              th:text="'$' + ${#numbers.formatDecimal(record.get('total_ventas'), 1, 'COMMA', 0, 'POINT')}">$0</span>
+                        <span th:unless="${field.name == 'contrasena'
+                                or (module.key == 'productos' and field.name == 'stock')
+                                or (module.key == 'reportes' and field.name == 'total_ventas')}"
+                              th:text="${record.get(field.name)}">valor</span>
+                    </td>
+                    <td class="actions">
+                        <a class="icon-action"
+                           th:href="@{/modules/{key}/{id}/edit(key=${module.key}, id=${record.get(module.idColumn)})}"
+                           title="Editar">
+                            <i class="bi bi-pencil-square"></i>
+                        </a>
+                        <form th:action="@{/modules/{key}/{id}/delete(key=${module.key}, id=${record.get(module.idColumn)})}"
+                              method="post"
+                              onsubmit="return confirm('¿Eliminar este registro?');">
+                            <button class="icon-action danger" type="submit" title="Eliminar">
+                                <i class="bi bi-trash3"></i>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="empty-state" th:if="${#lists.isEmpty(records)}">
+            <i class="bi" th:classappend="${module.icon}"></i>
+            <h3 th:text="${hasFilters} ? 'Sin coincidencias' : 'Sin registros'">Sin registros</h3>
+            <p th:if="${hasFilters and module.key == 'reportes'}">No hay reportes para el texto o el rango de fechas seleccionado.</p>
+            <p th:if="${hasFilters and module.key != 'reportes'}">No encontramos coincidencias. Prueba otra búsqueda.</p>
+            <p th:unless="${hasFilters}">Crea el primer <span th:text="${module.singular}">registro</span> para comenzar.</p>
+            <a class="btn-neon" th:href="@{/modules/{key}/new(key=${module.key})}">
+                <i class="bi bi-plus-lg"></i> Crear
+            </a>
+        </div>
+    </article>
+</section>
+</html>
